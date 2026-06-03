@@ -1,293 +1,878 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Interativo Moderno</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agrinho 2026 – Do Campo à Cidade</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-escuro: #1a3a1a;
+    --verde: #2e7d32;
+    --verde-claro: #7cb342;
+    --amarelo: #f9c74f;
+    --laranja: #f4845f;
+    --creme: #f5f0e8;
+    --terra: #a0522d;
+    --azul-ceu: #87ceeb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Space Mono', monospace;
+    background: var(--creme);
+    color: var(--verde-escuro);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR PERSONALIZADO */
+  .cursor {
+    width: 20px; height: 20px;
+    border: 2px solid var(--verde);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, background 0.2s;
+    mix-blend-mode: multiply;
+  }
+  .cursor.hover { transform: scale(2.5); background: var(--amarelo); border-color: var(--laranja); }
+
+  /* PARTÍCULAS */
+  .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--verde-claro);
+    opacity: 0.3;
+    animation: float-p linear infinite;
+  }
+
+  @keyframes float-p {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.3; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(-20px) rotate(360deg); opacity: 0; }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(245, 240, 232, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--verde-claro);
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--verde);
+    letter-spacing: -1px;
+  }
+  .logo span { color: var(--laranja); }
+  nav ul { list-style: none; display: flex; gap: 2rem; }
+  nav a {
+    text-decoration: none;
+    font-size: 0.75rem;
+    color: var(--verde-escuro);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    transition: color 0.3s;
+  }
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: var(--laranja);
+    transition: width 0.3s;
+  }
+  nav a:hover { color: var(--verde); }
+  nav a:hover::after { width: 100%; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    padding: 8rem 3rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(46,125,50,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(249,199,79,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, rgba(244,132,95,0.1) 0%, transparent 50%);
+  }
+
+  .hero-horizon {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 220px; z-index: 1;
+    background: linear-gradient(to top, rgba(46,125,50,0.18), transparent);
+    pointer-events: none;
+  }
+
+  /* Sol animado */
+  .sol {
+    position: absolute; top: 12%; right: 15%; z-index: 1;
+    width: 90px; height: 90px;
+    background: radial-gradient(circle, #ffe066 60%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 40px 20px rgba(249,199,79,0.25);
+    animation: pulseSol 3s ease-in-out infinite;
+  }
+  @keyframes pulseSol {
+    0%,100% { transform: scale(1); box-shadow: 0 0 40px 20px rgba(249,199,79,0.25); }
+    50% { transform: scale(1.08); box-shadow: 0 0 60px 30px rgba(249,199,79,0.35); }
+  }
+
+  /* Nuvem */
+  .nuvem {
+    position: absolute; z-index: 1;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.7;
+    animation: movNuvem linear infinite;
+  }
+  .nuvem::before, .nuvem::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+  }
+  .n1 { width:100px; height:30px; top:18%; left:-120px; animation-duration:28s; animation-delay:-8s; }
+  .n1::before { width:50px; height:50px; top:-25px; left:15px; }
+  .n1::after  { width:35px; height:35px; top:-15px; left:45px; }
+  .n2 { width:70px; height:20px; top:28%; left:-90px; animation-duration:38s; animation-delay:-20s; opacity:0.5; }
+  .n2::before { width:35px; height:35px; top:-18px; left:10px; }
+  .n2::after  { width:25px; height:25px; top:-10px; left:35px; }
+  @keyframes movNuvem { from { left: -150px; } to { left: 110%; } }
+
+  .hero-content { position: relative; z-index: 2; max-width: 800px; text-align: center; }
+
+  .tag-ano {
+    display: inline-block;
+    background: var(--verde);
+    color: white;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 0.4rem 1.2rem;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 1.0;
+    font-weight: 900;
+    color: var(--verde-escuro);
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  h1 em { color: var(--verde-claro); font-style: italic; }
+  h1 .linha2 { display: block; color: var(--laranja); }
+
+  .subtitulo {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 1.5rem 0 2.5rem;
+    line-height: 1.8;
+    max-width: 540px;
+    margin-left: auto; margin-right: auto;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .hero-btns {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.6s ease both;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 2px solid transparent;
+    border-radius: 2px;
+    cursor: none;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary { background: var(--verde); color: white; }
+  .btn-primary:hover { background: var(--verde-escuro); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,125,50,0.3); }
+  .btn-secondary { background: transparent; color: var(--verde-escuro); border-color: var(--verde-escuro); }
+  .btn-secondary:hover { background: var(--verde-escuro); color: white; transform: translateY(-2px); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ONDA */
+  .onda {
+    position: relative; overflow: hidden;
+    height: 80px; background: var(--creme);
+    margin-bottom: -2px;
+  }
+  .onda svg { position: absolute; bottom: 0; width: 100%; }
+
+  /* NÚMEROS */
+  .stats {
+    background: var(--verde-escuro);
+    padding: 4rem 3rem;
+    display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--amarelo);
+    display: block;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* SEÇÕES */
+  section { padding: 6rem 3rem; }
+
+  .section-tag {
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--laranja);
+    margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    color: var(--verde-escuro);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+  .section-title em { color: var(--verde-claro); font-style: italic; }
+
+  /* TEMAS */
+  #temas { background: var(--creme); }
+  .temas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .tema-card {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    padding: 2rem;
+    cursor: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tema-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--cor, var(--verde));
+    transition: width 0.3s;
+  }
+  .tema-card:hover { border-color: var(--cor, var(--verde)); transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+  .tema-card:hover::before { width: 100%; opacity: 0.06; }
+
+  .tema-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+  .tema-titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .tema-desc { font-size: 0.78rem; color: #666; line-height: 1.7; }
+
+  /* QUIZ */
+  #quiz {
+    background: var(--verde-escuro);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  #quiz::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(124,179,66,0.15) 0%, transparent 60%);
+  }
+  .quiz-box {
+    max-width: 700px;
+    margin: 3rem auto 0;
+    position: relative;
+  }
+  .quiz-pergunta {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    min-height: 60px;
+  }
+  .quiz-opcoes { display: flex; flex-direction: column; gap: 1rem; }
+  .quiz-opt {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.15);
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    padding: 1rem 1.4rem;
+    text-align: left;
+    cursor: none;
+    border-radius: 2px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .quiz-opt:hover { background: rgba(124,179,66,0.2); border-color: var(--verde-claro); }
+  .quiz-opt.correta { background: rgba(124,179,66,0.3); border-color: var(--verde-claro); }
+  .quiz-opt.errada  { background: rgba(244,132,95,0.25); border-color: var(--laranja); }
+  .quiz-feedback {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 2px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok  { background: rgba(124,179,66,0.2); border-left: 4px solid var(--verde-claro); }
+  .quiz-feedback.err { background: rgba(244,132,95,0.2); border-left: 4px solid var(--laranja); }
+  .quiz-nav {
+    margin-top: 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .quiz-progresso { font-size: 0.7rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; }
+  .quiz-barra {
+    width: 100%; height: 3px; background: rgba(255,255,255,0.1);
+    border-radius: 2px; margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .quiz-barra-fill {
+    height: 100%;
+    background: var(--verde-claro);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+  .quiz-pontos {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    color: var(--amarelo);
+  }
+
+  /* GALERIA */
+  #galeria { background: #f9f4ec; }
+  .galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+  .gal-item {
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: none;
+    position: relative;
+    aspect-ratio: 1;
+    transition: transform 0.3s;
+  }
+  .gal-item:first-child { grid-column: span 2; grid-row: span 2; }
+  .gal-item:hover { transform: scale(1.02); z-index: 2; }
+  .gal-inner {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem;
+    font-family: 'Fraunces', serif;
+    transition: transform 0.4s;
+    position: relative;
+  }
+  .gal-item:hover .gal-inner { transform: scale(1.1); }
+  .gal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(26,58,26,0.7);
+    opacity: 0;
+    display: flex; align-items: flex-end;
+    padding: 1.2rem;
+    transition: opacity 0.3s;
+  }
+  .gal-item:hover .gal-overlay { opacity: 1; }
+  .gal-overlay span { color: white; font-size: 0.75rem; letter-spacing: 1px; }
+
+  /* PARTICIPAR */
+  #participar {
+    background: var(--amarelo);
+    text-align: center;
+  }
+  #participar .section-title { color: var(--verde-escuro); }
+  .form-participar {
+    max-width: 500px;
+    margin: 3rem auto 0;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .form-participar input, .form-participar select {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    border: 2px solid var(--verde-escuro);
+    background: white;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+    cursor: none;
+  }
+  .form-participar input:focus { border-color: var(--verde); }
+  .form-participar input::placeholder { color: #aaa; }
+  .btn-inscricao {
+    background: var(--verde-escuro); color: white;
+    border: none; padding: 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: none;
+    border-radius: 2px;
+    transition: all 0.25s;
+  }
+  .btn-inscricao:hover { background: var(--verde); transform: translateY(-2px); }
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    color: var(--verde-escuro);
+  }
+  .form-success.show { display: block; }
+
+  /* FOOTER */
+  footer {
+    background: var(--verde-escuro);
+    color: rgba(255,255,255,0.6);
+    padding: 3rem;
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+  }
+  footer strong { color: var(--amarelo); }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    nav ul { gap: 1rem; }
+    .stats { gap: 2rem; }
+    .galeria-grid { grid-template-columns: repeat(2,1fr); }
+    .gal-item:first-child { grid-column: span 2; }
+    section { padding: 4rem 1.5rem; }
+  }
+</style>
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="logo">MeuSite<span>.</span></div>
-        
-        <nav class="nav-links" id="navLinks">
-            <a href="#home">Início</a>
-            <a href="#sobre">Sobre</a>
-            <a href="#servicos">Serviços</a>
-            <a href="#contato">Contato</a>
-        </nav>
+<div class="cursor" id="cursor"></div>
 
-        <div class="nav-controls">
-            <button id="themeToggle" class="theme-btn" aria-label="Alternar tema">🌓</button>
-            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
-        </div>
-    </header>
+<div class="particles" id="particles"></div>
 
-    <section id="home" class="hero-section">
-        <div class="hero-content">
-            <h1>Descubra a <span class="highlight">Interatividade</span></h1>
-            <p>Um site dinâmico, responsivo e focado na experiência do usuário.</p>
-            <button class="cta-btn" onclick="mostrarMensagem()">Clique Aqui</button>
-            <p id="mensagemOculta" class="hidden-msg">🎉 Obrigado por interagir! Você ativou uma função JavaScript.</p>
-        </div>
-    </section>
+<!-- NAV -->
+<nav>
+  <div class="logo">Agri<span>nho</span> 2026</div>
+  <ul>
+    <li><a href="#temas">Temas</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#participar">Participar</a></li>
+  </ul>
+</nav>
 
-    <section id="servicos" class="cards-section">
-        <h2>Nossos Serviços</h2>
-        <div class="cards-container">
-            <div class="card">
-                <h3>Design</h3>
-                <p>Interfaces bonitas e fáceis de usar.</p>
-            </div>
-            <div class="card">
-                <h3>Desenvolvimento</h3>
-                <p>Código limpo, rápido e otimizado.</p>
-            </div>
-            <div class="card">
-                <h3>Marketing</h3>
-                <p>Estratégias para fazer seu negócio crescer.</p>
-            </div>
-        </div>
-    </section>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-horizon"></div>
+  <div class="sol"></div>
+  <div class="nuvem n1"></div>
+  <div class="nuvem n2"></div>
 
-    <script>
-        // 1. Menu Hambúrguer Mobile
-        const menuToggle = document.getElementById('menuToggle');
-        const navLinks = document.getElementById('navLinks');
+  <div class="hero-content">
+    <span class="tag-ano">Paraná · 2026</span>
+    <h1>
+      <em>Do Campo</em>
+      <span class="linha2">à Cidade</span>
+    </h1>
+    <p class="subtitulo">
+      O Programa Agrinho conecta o mundo rural e urbano,  
+      celebrando a vida no campo, a tecnologia e o futuro sustentável do Paraná.
+    </p>
+    <div class="hero-btns">
+      <a href="#temas" class="btn btn-primary">Explorar temas</a>
+      <a href="#participar" class="btn btn-secondary">Participar</a>
+    </div>
+  </div>
+</section>
 
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
+<!-- STATS -->
+<div class="stats">
+  <div class="stat reveal"><span class="stat-num" data-target="400">0</span><span class="stat-label">Municípios</span></div>
+  <div class="stat reveal"><span class="stat-num" data-target="1200000">0</span><span class="stat-label">Alunos Participantes</span></div>
+  <div class="stat reveal"><span class="stat-num" data-target="30">0</span><span class="stat-label">Anos de História</span></div>
+  <div class="stat reveal"><span class="stat-num" data-target="5">0</span><span class="stat-label">Categorias</span></div>
+</div>
 
-        // 2. Alternador de Modo Escuro (Dark Mode)
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-        });
+<!-- TEMAS -->
+<section id="temas">
+  <div class="reveal">
+    <p class="section-tag">Tema Central</p>
+    <h2 class="section-title">Conexões que <em>nutrem</em><br>o futuro</h2>
+    <p style="font-size:0.82rem;color:#666;max-width:520px;line-height:1.8;">
+      Explore os pilares do Agrinho 2026 e descubra como o campo e a cidade  
+      constroem juntos uma sociedade mais justa e sustentável.
+    </p>
+  </div>
 
-        // 3. Botão de Ação Interativo
-        function mostrarMensagem() {
-            const msg = document.getElementById('mensagemOculta');
-            msg.classList.toggle('show');
-        }
-    </script>
+  <div class="temas-grid">
+    <div class="tema-card reveal" style="--cor:#2e7d32">
+      <span class="tema-icon">🌱</span>
+      <div class="tema-titulo">Agricultura Sustentável</div>
+      <p class="tema-desc">Práticas que preservam o solo, a água e a biodiversidade para as gerações futuras, unindo tradição e inovação.</p>
+    </div>
+    <div class="tema-card reveal" style="--cor:#f4845f">
+      <span class="tema-icon">🏙️</span>
+      <div class="tema-titulo">Campo e Cidade</div>
+      <p class="tema-desc">A interdependência entre o rural e o urbano: alimentos, cultura, pessoas e tecnologia em constante diálogo.</p>
+    </div>
+    <div class="tema-card reveal" style="--cor:#f9c74f">
+      <span class="tema-icon">💧</span>
+      <div class="tema-titulo">Água e Vida</div>
+      <p class="tema-desc">O uso consciente da água como direito fundamental e responsabilidade coletiva de todos os paranaenses.</p>
+    </div>
+    <div class="tema-card reveal" style="--cor:#7cb342">
+      <span class="tema-icon">🤝</span>
+      <div class="tema-titulo">Trabalho e Cidadania</div>
+      <p class="tema-desc">O protagonismo dos jovens na construção de comunidades solidárias, produtivas e com dignidade para todos.</p>
+    </div>
+    <div class="tema-card reveal" style="--cor:#87ceeb">
+      <span class="tema-icon">🔬</span>
+      <div class="tema-titulo">Tecnologia no Campo</div>
+      <p class="tema-desc">Drones, sensores e agro 4.0: como a inovação chega à lavoura e transforma a produção paranaense.</p>
+    </div>
+    <div class="tema-card reveal" style="--cor:#a0522d">
+      <span class="tema-icon">🌎</span>
+      <div class="tema-titulo">Meio Ambiente</div>
+      <p class="tema-desc">Preservar florestas, cerrados e rios é responsabilidade de quem vive no campo e nas cidades paranaenses.</p>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="reveal">
+    <p class="section-tag" style="color:var(--verde-claro)">Interativo</p>
+    <h2 class="section-title" style="color:white">Teste seus <em>conhecimentos</em></h2>
+  </div>
+
+  <div class="quiz-box reveal">
+    <div class="quiz-barra"><div class="quiz-barra-fill" id="quiz-fill" style="width:0%"></div></div>
+    <div class="quiz-pontos" id="quiz-pontos">⭐ 0 pontos</div>
+    <p class="quiz-pergunta" id="quiz-p">Carregando...</p>
+    <div class="quiz-opcoes" id="quiz-opts"></div>
+    <div class="quiz-feedback" id="quiz-fb"></div>
+    <div class="quiz-nav">
+      <span class="quiz-progresso" id="quiz-prog">1 / 6</span>
+      <button class="btn btn-primary" id="quiz-next" style="display:none;cursor:none;">Próxima →</button>
+    </div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section id="galeria">
+  <div class="reveal">
+    <p class="section-tag">Galeria</p>
+    <h2 class="section-title">O Paraná <em>vivo</em></h2>
+  </div>
+
+  <div class="galeria-grid reveal">
+    <div class="gal-item" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9)">
+      <div class="gal-inner">🌾</div>
+      <div class="gal-overlay"><span>CAMPOS DE TRIGO — GUARAPUAVA</span></div>
+    </div>
+    <div class="gal-item" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2)">
+      <div class="gal-inner">☀️</div>
+      <div class="gal-overlay"><span>PLANTAÇÃO DE SOJA</span></div>
+    </div>
+    <div class="gal-item" style="background:linear-gradient(135deg,#e3f2fd,#bbdefb)">
+      <div class="gal-inner">💧</div>
+      <div class="gal-overlay"><span>RIO IGUAÇU</span></div>
+    </div>
+    <div class="gal-item" style="background:linear-gradient(135deg,#f3e5f5,#e1bee7)">
+      <div class="gal-inner">🍓</div>
+      <div class="gal-overlay"><span>FEIRA DE ORGÂNICOS</span></div>
+    </div>
+    <div class="gal-item" style="background:linear-gradient(135deg,#e8f5e9,#a5d6a7)">
+      <div class="gal-inner">🌳</div>
+      <div class="gal-overlay"><span>ARAUCÁRIA — SÍMBOLO DO PARANÁ</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTICIPAR -->
+<section id="participar">
+  <div class="reveal">
+    <p class="section-tag" style="color:var(--verde)">Inscrições Abertas</p>
+    <h2 class="section-title">Faça parte do<br><em>Agrinho 2026</em></h2>
+    <p style="font-size:0.82rem;color:var(--verde-escuro);max-width:460px;margin:0 auto;line-height:1.8;opacity:0.8;">
+      Alunos do Ensino Fundamental e Médio de escolas públicas e privadas do Paraná podem participar.
+    </p>
+  </div>
+
+  <div class="form-participar reveal" id="form-container">
+    <input type="text" placeholder="Nome completo" id="f-nome">
+    <input type="text" placeholder="Escola" id="f-escola">
+    <input type="text" placeholder="Município" id="f-municipio">
+    <select id="f-categoria">
+      <option value="" disabled selected>Selecione a categoria</option>
+      <option>Desenho – Anos Iniciais (1º ao 3º ano)</option>
+      <option>Redação – Anos Finais (6º ao 9º ano)</option>
+      <option>Redação – Ensino Médio</option>
+      <option>Fotografia</option>
+      <option>Vídeo</option>
+    </select>
+    <button class="btn-inscricao" onclick="enviarForm()">Enviar inscrição</button>
+  </div>
+  <div class="form-success" id="form-success">
+    🌱 Inscrição recebida!<br>
+    <span style="font-size:0.9rem;font-family:'Space Mono';opacity:0.8;">Boa sorte no Agrinho 2026!</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Agrinho 2026 · <strong>Do Campo à Cidade</strong> · Programa do Sistema FAEP/SENAR-PR</p>
+  <p style="margin-top:0.5rem">© 2026 · Desenvolvido com 💚 para as escolas do Paraná</p>
+</footer>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX - 10 + 'px';
+    cursor.style.top  = e.clientY - 10 + 'px';
+  });
+  document.querySelectorAll('a,button,.tema-card,.gal-item,.quiz-opt').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+
+  // PARTÍCULAS
+  const pContainer = document.getElementById('particles');
+  const emojis = ['🌿','🍃','🌾','⭐','🌱'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (12 + Math.random() * 20) + 's';
+    p.style.animationDelay = -(Math.random() * 20) + 's';
+    p.style.width = p.style.height = (4 + Math.random() * 6) + 'px';
+    p.style.background = ['#7cb342','#f9c74f','#f4845f','#2e7d32'][Math.floor(Math.random()*4)];
+    pContainer.appendChild(p);
+  }
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // CONTADORES
+  function animateCount(el, target, duration = 1800) {
+    const start = performance.now();
+    const fmt = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(0)+'k' : n;
+    const step = ts => {
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.round(ease * target));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const statObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target.querySelector('[data-target]');
+        if (el) animateCount(el, +el.dataset.target);
+        statObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.stat').forEach(s => statObs.observe(s));
+
+  // QUIZ
+  const perguntas = [
+    {
+      p: "O que é o Programa Agrinho?",
+      opts: ["Um festival de música rural","Programa de educação que conecta campo e cidade no Paraná","Um campeonato de rodeio","Feira agropecuária anual"],
+      c: 1,
+      fb: "O Agrinho é um programa de educação do Sistema FAEP/SENAR-PR que conecta estudantes ao mundo rural e urbano do Paraná desde 1995."
+    },
+    {
+      p: "O Paraná é o maior produtor nacional de qual grão?",
+      opts: ["Arroz","Café","Milho","Trigo"],
+      c: 3,
+      fb: "O Paraná é o maior produtor de trigo do Brasil, responsável por mais de 50% da produção nacional, especialmente na região Sudoeste."
+    },
+    {
+      p: "O que significa Agro 4.0?",
+      opts: ["Quarta geração de fertilizantes químicos","Uso de tecnologias digitais no campo (drones, IoT, IA)","Quarta edição da feira agrícola","Programa de irrigação com 4 poços"],
+      c: 1,
+      fb: "Agro 4.0 é a aplicação de tecnologias da Quarta Revolução Industrial na agricultura: drones, sensores, big data e inteligência artificial a serviço da lavoura."
+    },
+    {
+      p: "Qual árvore é símbolo do Paraná?",
+      opts: ["Ipê-amarelo","Baobá","Araucária","Pau-brasil"],
+      c: 2,
+      fb: "A araucária (Araucaria angustifolia) é o símbolo máximo do Paraná, presente na bandeira do estado. Espécie nativa da Mata Atlântica, hoje está ameaçada de extinção."
+    },
+    {
+      p: "Para que serve a rotação de culturas?",
+      opts: ["Plantar a mesma cultura todo ano","Preservar o solo, reduzir pragas e aumentar fertilidade","Economizar sementes","Diminuir o trabalho na colheita"],
+      c: 1,
+      fb: "A rotação de culturas consiste em alternar diferentes espécies vegetais numa mesma área ao longo do tempo, preservando os nutrientes do solo e reduzindo pragas naturalmente."
+    },
+    {
+      p: "Qual é o tema do Agrinho 2026?",
+      opts: ["Água é Vida","Do Campo à Cidade","Sementes do Futuro","Raízes Paranaenses"],
+      c: 1,
+      fb: "O tema do Agrinho 2026, 'Do Campo à Cidade', celebra a conexão entre o rural e o urbano, mostrando como esses mundos são interdependentes e complementares."
+    },
+  ];
+
+  let qAtual = 0, pontos = 0, respondido = false;
+
+  function renderQuiz() {
+    const q = perguntas[qAtual];
+    document.getElementById('quiz-p').textContent = q.p;
+    document.getElementById('quiz-prog').textContent = `${qAtual + 1} / ${perguntas.length}`;
+    document.getElementById('quiz-fill').style.width = ((qAtual / perguntas.length) * 100) + '%';
+    document.getElementById('quiz-pontos').textContent = `⭐ ${pontos} pontos`;
+    const opts = document.getElementById('quiz-opts');
+    opts.innerHTML = '';
+    q.opts.forEach((o, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = o;
+      btn.onclick = () => responder(i);
+      opts.appendChild(btn);
+    });
+    document.getElementById('quiz-fb').className = 'quiz-feedback';
+    document.getElementById('quiz-fb').textContent = '';
+    document.getElementById('quiz-next').style.display = 'none';
+    respondido = false;
+  }
+
+  function responder(idx) {
+    if (respondido) return;
+    respondido = true;
+    const q = perguntas[qAtual];
+    const btns = document.querySelectorAll('.quiz-opt');
+    const fb = document.getElementById('quiz-fb');
+
+    if (idx === q.c) {
+      btns[idx].classList.add('correta');
+      fb.textContent = '✅ Correto! ' + q.fb;
+      fb.className = 'quiz-feedback show ok';
+      pontos += 10;
+    } else {
+      btns[idx].classList.add('errada');
+      btns[q.c].classList.add('correta');
+      fb.textContent = '❌ Ops! ' + q.fb;
+      fb.className = 'quiz-feedback show err';
+    }
+    document.getElementById('quiz-pontos').textContent = `⭐ ${pontos} pontos`;
+    document.getElementById('quiz-next').style.display = qAtual < perguntas.length - 1 ? 'inline-block' : 'none';
+
+    if (qAtual === perguntas.length - 1) {
+      setTimeout(() => {
+        const msg = pontos >= 50 ? '🏆 Excelente! Você é um especialista Agrinho!' :
+                    pontos >= 30 ? '🌱 Muito bem! Continue aprendendo!' :
+                    '📚 Continue estudando sobre o campo e a cidade!';
+        document.getElementById('quiz-p').textContent = `Fim do quiz! ${msg}`;
+        document.getElementById('quiz-opts').innerHTML = `<button class="quiz-opt" onclick="reiniciarQuiz()">🔄 Jogar novamente</button>`;
+        document.getElementById('quiz-fb').className = 'quiz-feedback';
+        document.getElementById('quiz-fill').style.width = '100%';
+      }, 1500);
+    }
+  }
+
+  document.getElementById('quiz-next').onclick = () => {
+    qAtual++;
+    renderQuiz();
+  };
+
+  function reiniciarQuiz() { qAtual = 0; pontos = 0; renderQuiz(); }
+  renderQuiz();
+
+  // FORMULÁRIO
+  function enviarForm() {
+    const nome = document.getElementById('f-nome').value.trim();
+    const escola = document.getElementById('f-escola').value.trim();
+    const municipio = document.getElementById('f-municipio').value.trim();
+    const cat = document.getElementById('f-categoria').value;
+    if (!nome || !escola || !municipio || !cat) {
+      alert('Por favor, preencha todos os campos!');
+      return;
+    }
+    document.getElementById('form-container').style.display = 'none';
+    const s = document.getElementById('form-success');
+    s.innerHTML = `🌱 Inscrição de <strong>${nome}</strong> recebida!<br><span style="font-size:0.85rem;font-family:'Space Mono';opacity:0.8;">Categoria: ${cat}<br>Boa sorte no Agrinho 2026!</span>`;
+    s.classList.add('show');
+  }
+</script>
 </body>
-</html>/* --- Variáveis de Cores (Facilita o Dark Mode) --- */
-:root {
-    --bg-color: #ffffff;
-    --text-color: #333333;
-    --primary-color: #4f46e5;
-    --card-bg: #f3f4f6;
-    --navbar-bg: rgba(255, 255, 255, 0.95);
-}
-
-/* Cores quando o Modo Escuro está ativo */
-body.dark-mode {
-    --bg-color: #111827;
-    --text-color: #f9fafb;
-    --primary-color: #818cf8;
-    --card-bg: #1f2937;
-    --navbar-bg: rgba(17, 24, 39, 0.95);
-}
-
-/* --- Resets e Estilos Gerais --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
-}
-
-/* --- Barra de Navegação --- */
-.navbar {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 5%;
-    background-color: var(--navbar-bg);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 1000;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.logo span {
-    color: var(--primary-color);
-}
-
-.nav-links a {
-    color: var(--text-color);
-    text-decoration: none;
-    margin-left: 2rem;
-    font-weight: 500;
-    position: relative;
-}
-
-/* Efeito hover nos links */
-.nav-links a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -5px;
-    left: 0;
-    background-color: var(--primary-color);
-    transition: width 0.3s ease;
-}
-
-.nav-links a:hover::after {
-    width: 100%;
-}
-
-.nav-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-button {
-    cursor: pointer;
-    border: none;
-    background: none;
-    font-size: 1.2rem;
-}
-
-.menu-toggle {
-    display: none; /* Oculto no desktop */
-    color: var(--text-color);
-}
-
-/* --- Seção Hero (Principal) --- */
-.hero-section {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 0 1rem;
-}
-
-.hero-content h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.highlight {
-    color: var(--primary-color);
-}
-
-.cta-btn {
-    margin-top: 2rem;
-    padding: 0.8rem 2rem;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 30px;
-    font-weight: bold;
-    font-size: 1rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.cta-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
-}
-
-/* Interatividade da Mensagem Oculta */
-.hidden-msg {
-    margin-top: 1.5rem;
-    color: #10b981;
-    font-weight: bold;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.4s ease;
-}
-
-.hidden-msg.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* --- Seção de Cards --- */
-.cards-section {
-    padding: 5rem 5%;
-    text-align: center;
-}
-
-.cards-section h2 {
-    margin-bottom: 3rem;
-    font-size: 2rem;
-}
-
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-}
-
-.card {
-    background-color: var(--card-bg);
-    padding: 2.5rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Efeito de hover interativo nos cards */
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 20px rgba(0,0,0,0.1);
-    border-bottom: 4px solid var(--primary-color);
-}
-
-.card h3 {
-    margin-bottom: 1rem;
-}
-
-/* --- Responsividade (Telas Menores / Mobile) --- */
-@media (max-width: 768px) {
-    .menu-toggle {
-        display: block; /* Mostra o botão hambúrguer */
-    }
-
-    .nav-links {
-        position: absolute;
-        top: 100%;
-        right: -100%;
-        width: 200px;
-        height: calc(100vh - 100%);
-        background-color: var(--navbar-bg);
-        display: flex;
-        flex-direction: column;
-        padding: 2rem;
-        gap: 1.5rem;
-        box-shadow: -5px 5px 10px rgba(0,0,0,0.05);
-        transition: right 0.3s ease;
-    }
-
-    /* Quando o menu é ativado pelo JS */
-    .nav-links.active {
-        right: 0;
-    }
-
-    .nav-links a {
-        margin-left: 0;
-    }
-
-    .hero-content h1 {
-        font-size: 2.2rem;
-    }
-}
+</html>
